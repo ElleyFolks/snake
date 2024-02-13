@@ -7,18 +7,20 @@ public class Snake : MonoBehaviour
     // snake movement in x / y axes so Vector2 is required
     private Vector2 _direction = Vector2.right;
 
-    // list to track snake segments
-    private List<Transform> _segments;
+    // list to track snake segments, Note: initialized to prevent crashing
+    private List<Transform> _segments = new List<Transform>();
 
     // references prefab snake segment
     public Transform segmentPrefab;
+
+    // initial size of snake
+    public int initialSize = 3;
 
     
     // Start is called before the first frame update
     void Start()
     {
-        _segments = new List<Transform>();
-        _segments.Add(this.transform); // adds 'head' or first segment
+        ResetState();
     }
 
     // Update is called once per frame
@@ -66,6 +68,30 @@ public class Snake : MonoBehaviour
         _segments.Add(segment);
     }
 
+    // "game over", resets state to beginning
+    private void ResetState()
+    {
+        // resetting "score" starting at head
+        for (int i = 1; i < _segments.Count; i++) 
+        {
+            Destroy(_segments[i].gameObject);
+        }
+
+        // must clear list because there are still references to destroyed game objects
+        _segments.Clear();
+
+        //adding snake head object to start again
+        _segments.Add(this.transform);
+        
+        for(int i = 1; i < this.initialSize; ++i)
+        {
+            _segments.Add(Instantiate(this.segmentPrefab));
+        }
+
+        // resetting position of snake randomly
+        this.transform.position = Vector3.zero;
+    }
+
     // trigger to add segment when food object is collided with
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -73,6 +99,12 @@ public class Snake : MonoBehaviour
         if (other.tag == "Food")
         {
             Grow();
+        }
+
+        // Game over if snake collides with wall or other segments
+        if(other.tag == "Obstacle")
+        {
+            ResetState();
         }
     }
 }
