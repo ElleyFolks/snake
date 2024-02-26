@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    // Closes the application.
+    public void ExitButton()
     {
-        
+        Application.Quit();
+        Debug.Log("Game closed.");
+
     }
 
-    // Update is called once per frame
-    void Update()
+    // Starts application by changing game scene.
+    public void StartGame()
     {
-        
+        SceneManager.LoadScene("snake");
+        Debug.Log("Game started.");
     }
+   
 }
