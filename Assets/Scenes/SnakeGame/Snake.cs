@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Snake : MonoBehaviour
@@ -16,7 +18,14 @@ public class Snake : MonoBehaviour
     // initial size of snake
     public int initialSize = 3;
 
-    
+    // final score of player
+    public int finalScore = 0;
+
+    // true if snake is moving, false otherwise
+    private bool isMoving = true;
+
+    public GameOverScreen gameOverScreen;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,35 +35,51 @@ public class Snake : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // must assign a direction of snake based on user input
-        if(Input.GetKeyDown(KeyCode.W))
+        if (isMoving)
         {
-            _direction = Vector2.up;
-        }else if (Input.GetKeyDown(KeyCode.S)) { 
-            _direction = Vector2.down;
-        }else if (Input.GetKeyDown(KeyCode.A)) { 
-            _direction = Vector2.left; 
-        }else if(Input.GetKeyDown(KeyCode.D)) { 
-            _direction = Vector2.right;
+            // must assign a direction of snake based on user input
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                _direction = Vector2.up;
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                _direction = Vector2.down;
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                _direction = Vector2.left;
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                _direction = Vector2.right;
+            }
         }
+
     }
+
+    
 
     // FixedUpdate is called at a fixed time interval, useful for consistent game physics
     private void FixedUpdate() 
     {
-        //updating position of each segment starting from tail
-        for(int i = (_segments.Count-1); i > 0; i--)
+        if (isMoving)
         {
-            _segments[i].position = _segments[i - 1].position;
+            //updating position of each segment starting from tail
+            for (int i = (_segments.Count - 1); i > 0; i--)
+            {
+                _segments[i].position = _segments[i - 1].position;
+
+            }
+
+            // changing direction of head segment, rounding to keep snake aligned on a grid
+            this.transform.position = new Vector3(
+                Mathf.Round(this.transform.position.x) + _direction.x,
+                Mathf.Round(this.transform.position.y) + _direction.y,
+                0.0f
+                );
 
         }
-
-        // changing direction of head segment, rounding to keep snake aligned on a grid
-        this.transform.position = new Vector3(
-            Mathf.Round(this.transform.position.x) + _direction.x,
-            Mathf.Round(this.transform.position.y) + _direction.y,
-            0.0f
-            );
     }
 
     // adds a segment to snake
@@ -68,28 +93,47 @@ public class Snake : MonoBehaviour
         _segments.Add(segment);
     }
 
-    // "game over", resets state to beginning
-    private void ResetState()
+    private void DestroySnakeSegments()
     {
         // resetting "score" starting at head
-        for (int i = 1; i < _segments.Count; i++) 
+        for (int i = 1; i < _segments.Count; i++)
         {
             Destroy(_segments[i].gameObject);
         }
 
         // must clear list because there are still references to destroyed game objects
         _segments.Clear();
+    }
+
+
+    // resets state to beginning
+    public void ResetState()
+    {
+        isMoving = true;
+        DestroySnakeSegments();
 
         //adding snake head object to start again
         _segments.Add(this.transform);
-        
-        for(int i = 1; i < this.initialSize; ++i)
+
+        for (int i = 1; i < this.initialSize; ++i)
         {
             _segments.Add(Instantiate(this.segmentPrefab));
         }
 
         // resetting position of snake randomly
         this.transform.position = Vector3.zero;
+    }
+
+
+    public Boolean GameOver()
+    {
+        // gets player's final score and displays it on game over screen
+        finalScore = _segments.Count;
+        gameOverScreen.Setup(finalScore);
+
+        isMoving = false;
+
+        return true;
     }
 
     // trigger to add segment when food object is collided with
@@ -104,7 +148,8 @@ public class Snake : MonoBehaviour
         // Game over if snake collides with wall or other segments
         if(other.tag == "Obstacle")
         {
-            ResetState();
+            //ResetState();
+            GameOver();
         }
     }
 }
