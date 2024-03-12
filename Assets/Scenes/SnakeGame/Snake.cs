@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/*
+ * Class that controls behavior of player.
+ * Contains methods to restart the game state, iniate game over, grow the snake in size, and basic controls for the direction of the player.
+ */
 public class Snake : MonoBehaviour
 {
     // snake movement in x / y axes so Vector2 is required
@@ -15,10 +19,8 @@ public class Snake : MonoBehaviour
     // references prefab snake segment
     public Transform segmentPrefab;
 
-    // initial size of snake
     public int initialSize = 3;
 
-    // final score of player
     public int finalScore = 0;
 
     // true if snake is moving, false otherwise
@@ -31,6 +33,7 @@ public class Snake : MonoBehaviour
     {
         ResetState();
     }
+
 
     // Update is called once per frame
     void Update()
@@ -58,11 +61,11 @@ public class Snake : MonoBehaviour
 
     }
 
-    
 
     // FixedUpdate is called at a fixed time interval, useful for consistent game physics
     private void FixedUpdate() 
     {
+        // only updates position if snake should be moving
         if (isMoving)
         {
             //updating position of each segment starting from tail
@@ -78,11 +81,11 @@ public class Snake : MonoBehaviour
                 Mathf.Round(this.transform.position.y) + _direction.y,
                 0.0f
                 );
-
         }
     }
 
-    // adds a segment to snake
+
+    // Adds a segment to the snake
     private void Grow()
     {
         // instatiantes a new segment and adds it to segment list
@@ -93,9 +96,11 @@ public class Snake : MonoBehaviour
         _segments.Add(segment);
     }
 
+
+    // Destroys all segments in the snake
     private void DestroySnakeSegments()
     {
-        // resetting "score" starting at head
+        // resetting number of segments starting at head
         for (int i = 1; i < _segments.Count; i++)
         {
             Destroy(_segments[i].gameObject);
@@ -106,7 +111,11 @@ public class Snake : MonoBehaviour
     }
 
 
-    // resets state to beginning
+    /*
+     * Restarts the game. 
+     * Snake segments are set back to default value, additional segments are destroyed. 
+     * Position is randomly reset.
+     */
     public void ResetState()
     {
         isMoving = true;
@@ -125,9 +134,13 @@ public class Snake : MonoBehaviour
     }
 
 
+    /*
+     * Initiates game over. 
+     * The game over screen is displayed, the final score is displayed. 
+     * Snake no longer moves.
+     */
     public Boolean GameOver()
     {
-        // gets player's final score and displays it on game over screen
         finalScore = _segments.Count;
         gameOverScreen.Setup(finalScore);
 
@@ -136,19 +149,19 @@ public class Snake : MonoBehaviour
         return true;
     }
 
-    // trigger to add segment when food object is collided with
-    private void OnTriggerEnter2D(Collider2D other)
+
+    // On collision event, triggered to add segment when food object is collided with, or game over if snake segment / wall is collided with
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Checks that player is what collided with object
-        if (other.tag == "Food")
+        // checks that player is what collided with object
+        if (collision.tag == "Food")
         {
             Grow();
         }
 
-        // Game over if snake collides with wall or other segments
-        if(other.tag == "Obstacle")
+        // game over if player collides with wall or other segments
+        if (collision.tag == "Obstacle")
         {
-            //ResetState();
             GameOver();
         }
     }

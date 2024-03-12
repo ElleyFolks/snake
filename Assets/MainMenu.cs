@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
+/*
+ * Main menu class that either starts the game or closes the application.
+ */
 public class MainMenu : MonoBehaviour
 {
-    // Closes the application.
+    /*
+     * On action, will close the application.
+     */
     public void ExitButton()
     {
         Application.Quit();
@@ -13,7 +19,9 @@ public class MainMenu : MonoBehaviour
 
     }
 
-    // Starts application by changing game scene.
+    /*
+     * On action, will start application by changing game scene.
+     */
     public void StartGame()
     {
         SceneManager.LoadScene("snake");
